@@ -87,27 +87,11 @@ class _SuccessBody extends StatelessWidget {
       return const Icon(Icons.error_outline, color: Colors.pink);
     }
 
-    String getSubtitle(entity.Worksheet worksheet) {
-      if (worksheet.issues.isEmpty) {
-        return "Status: Export Ready";
-      }
-
-      return "Status: ${worksheet.issues.length} Issues Found";
-    }
-
     Row getActions(entity.Worksheet worksheet) {
-      const double boxSize = 48;
-
       return Row(
         children: [
-          SizedBox(
-            width: boxSize,
-            child: _IssuesButton(worksheet: worksheet),
-          ),
-          SizedBox(
-            width: boxSize,
-            child: _ExportButton(worksheet: worksheet),
-          ),
+          _IssuesButton(worksheet: worksheet),
+          _ExportButton(worksheet: worksheet),
         ],
       );
     }
@@ -122,32 +106,67 @@ class _SuccessBody extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "WorksheetName: ${worksheet.worksheetName}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w400,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        getSubtitle(worksheet),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w200,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    "WorksheetName: ${worksheet.worksheetName}",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 16,
+                    ),
                   ),
                   getActions(worksheet),
                 ],
               ),
+              subtitle: _RecordInformation(worksheet: worksheet),
             ),
         ],
       ),
+    );
+  }
+}
+
+class _RecordInformation extends StatelessWidget {
+  const _RecordInformation({
+    required this.worksheet,
+  });
+
+  final entity.Worksheet worksheet;
+
+  @override
+  Widget build(context) {
+    Column getPart(String header, int count) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            header,
+            style: const TextStyle(
+              fontWeight: FontWeight.w400,
+              fontSize: 12,
+            ),
+          ),
+          Text(
+            count.toString(),
+            style: const TextStyle(
+              fontWeight: FontWeight.w200,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        SizedBox(
+          width: 128,
+          child: getPart("RowCount", worksheet.worksheetRecords.length),
+        ),
+        SizedBox(
+          width: 128,
+          child: getPart("ColumnCount", worksheet.schemaConstraints.length),
+        ),
+      ],
     );
   }
 }

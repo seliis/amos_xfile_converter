@@ -47,10 +47,13 @@ class _Button extends StatelessWidget {
           );
     }
 
-    return IconButton(
-      onPressed: worksheet.issues.isNotEmpty ? null : invokeExport,
-      icon: const Icon(Icons.download),
-      tooltip: "Export",
+    return SizedBox(
+      width: 48,
+      child: IconButton(
+        onPressed: worksheet.issues.isNotEmpty ? null : invokeExport,
+        icon: const Icon(Icons.download),
+        tooltip: "Export",
+      ),
     );
   }
 }

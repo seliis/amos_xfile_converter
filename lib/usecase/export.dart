@@ -9,11 +9,11 @@ import "package:bakkugi/entity/index.dart" as entity;
 class Export extends Cubit<ExportState> {
   Export() : super(ExportInitial());
 
-  static List<String> _getChunks(List<entity.SchemaConstraint> schemaConstraints, List<List<String?>> records) {
+  static List<String> _getChunks(List<entity.SchemaConstraint> schemaConstraints, List<List<entity.Cell>> records) {
     final List<String> chunks = [];
 
     for (int i = 0; i < records.length; i++) {
-      final record = records[i];
+      final List<entity.Cell> record = records[i];
       String string = "";
 
       for (int i = 0; i < record.length; i++) {
@@ -21,12 +21,10 @@ class Export extends Cubit<ExportState> {
 
         final List<String> segment = List.filled(schemaConstraint.capacity, " ");
 
-        final String? data = record[i];
+        final entity.Cell cell = record[i];
 
-        if (data != null) {
-          for (int j = 0; j < data.length; j++) {
-            segment[j] = data[j];
-          }
+        for (int j = 0; j < cell.data.length; j++) {
+          segment[j] = cell.data[j];
         }
 
         string += segment.join();
@@ -58,7 +56,7 @@ class Export extends Cubit<ExportState> {
     await file.writeAsString(buffer.toString(), mode: FileMode.write);
   }
 
-  Future<void> export(List<entity.SchemaConstraint> schemaConstraints, List<List<String?>> records, String worksheetName) async {
+  Future<void> export(List<entity.SchemaConstraint> schemaConstraints, List<List<entity.Cell>> records, String worksheetName) async {
     emit(ExportLoading());
 
     final List<String> chunks = _getChunks(schemaConstraints, records);

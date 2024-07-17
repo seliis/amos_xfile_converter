@@ -9,20 +9,20 @@ import "package:bakkugi/entity/index.dart" as entity;
 class Import extends Cubit<ImportState> {
   Import() : super(ImportInitial());
 
-  static List<entity.Issue> _getIssues(List<entity.SchemaConstraint> schemaConstraints, List<List<String?>> worksheetRecords) {
+  static List<entity.Issue> _getIssues(List<entity.SchemaConstraint> schemaConstraints, List<List<entity.Cell>> worksheetRecords) {
     final List<entity.Issue> issues = [];
 
-    for (final List<String?> row in worksheetRecords) {
+    for (final List<entity.Cell> cells in worksheetRecords) {
       for (int i = 0; i < schemaConstraints.length; i++) {
         final entity.SchemaConstraint schemaConstraint = schemaConstraints[i];
-        final String? data = row[i];
+        final entity.Cell cell = cells[i];
 
         final entity.IssuePosition position = entity.IssuePosition(
-          row: worksheetRecords.indexOf(row) + 2,
-          column: i + 1,
+          row: cell.rowIndex,
+          column: cell.columnIndex,
         );
 
-        if (schemaConstraint.isRequired && data == null) {
+        if (schemaConstraint.isRequired && cell.data == "") {
           issues.add(
             entity.Issue(
               type: entity.IssueType.schemaInfraction,
@@ -32,12 +32,14 @@ class Import extends Cubit<ImportState> {
           );
         }
 
-        if (schemaConstraint.capacity > 0 && data != null && data.length > schemaConstraint.capacity) {
+        if (schemaConstraint.capacity > 0 && cell.data.length > schemaConstraint.capacity) {
           issues.add(
             entity.Issue(
               type: entity.IssueType.schemaInfraction,
               message: entity.IssueMessage.capacityExceeded,
               position: position,
+              additionalInfo: "Cap: ${schemaConstraint.capacity}, Len: ${cell.data.length}(+${cell.data.length - schemaConstraint.capacity})",
+              data: cell.data,
             ),
           );
         }
@@ -71,10 +73,10 @@ class Import extends Cubit<ImportState> {
         );
       }
 
-      final List<List<String?>> worksheetRecords = [];
+      final List<List<entity.Cell>> worksheetRecords = [];
 
       for (final List<excel.Data?> row in sheet.rows.sublist(1)) {
-        worksheetRecords.add(row.map((data) => data?.value.toString()).toList());
+        worksheetRecords.add(row.map((data) => entity.Cell.fromData(data)).toList());
       }
 
       worksheets.add(

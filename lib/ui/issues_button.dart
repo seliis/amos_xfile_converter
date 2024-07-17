@@ -17,10 +17,10 @@ class _IssuesButton extends StatelessWidget {
 
           return AlertDialog(
             title: const Text(
-              "Worksheet Issues",
+              "** Worksheet Issues **",
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontWeight: FontWeight.w700,
-                color: Colors.pink,
               ),
             ),
             content: SizedBox(
@@ -29,19 +29,7 @@ class _IssuesButton extends StatelessWidget {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    for (final entity.Issue issue in worksheet.issues)
-                      ListTile(
-                        title: Text(
-                          "#${worksheet.issues.indexOf(issue) + 1} ${issue.type.display}: ${issue.message.display}",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        subtitle: Text(
-                          "Row: ${issue.position.row}, Column: ${issue.position.column}",
-                          style: const TextStyle(),
-                        ),
-                      ),
+                    for (final entity.Issue issue in worksheet.issues) _Issue(issue: issue),
                   ],
                 ),
               ),
@@ -51,10 +39,97 @@ class _IssuesButton extends StatelessWidget {
       );
     }
 
-    return IconButton(
-      icon: const Icon(Icons.rule),
-      tooltip: "Issues",
-      onPressed: worksheet.issues.isNotEmpty ? invokeIssuesView : null,
+    return Badge(
+      isLabelVisible: worksheet.issues.isNotEmpty,
+      label: Text("${worksheet.issues.length}"),
+      textStyle: const TextStyle(
+        fontWeight: FontWeight.w700,
+        fontSize: 12,
+      ),
+      child: SizedBox(
+        width: 48,
+        child: IconButton(
+          icon: const Icon(Icons.rule),
+          tooltip: "${worksheet.issues.length} Issues",
+          onPressed: worksheet.issues.isNotEmpty ? invokeIssuesView : null,
+        ),
+      ),
+    );
+  }
+}
+
+class _Issue extends StatelessWidget {
+  const _Issue({
+    required this.issue,
+  });
+
+  final entity.Issue issue;
+
+  @override
+  Widget build(context) {
+    return ListTile(
+      leading: issue.type.icon,
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            issue.type.display,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            "R${issue.position.row}:C${issue.position.column}",
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Colors.grey,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+      subtitle: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            issue.message.display,
+            style: const TextStyle(
+              fontWeight: FontWeight.w200,
+            ),
+          ),
+          const SizedBox(
+            width: 16,
+          ),
+          Expanded(
+            child: Text(
+              "data: ${issue.data}",
+              style: const TextStyle(
+                fontWeight: FontWeight.w200,
+                fontStyle: FontStyle.italic,
+                color: Colors.grey,
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.end,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(
+            width: 16,
+          ),
+          if (issue.additionalInfo != null)
+            Text(
+              issue.additionalInfo!,
+              style: const TextStyle(
+                fontWeight: FontWeight.w200,
+                fontStyle: FontStyle.italic,
+                color: Colors.grey,
+                fontSize: 12,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
