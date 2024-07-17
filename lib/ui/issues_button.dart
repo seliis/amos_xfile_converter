@@ -111,7 +111,7 @@ class _Issue extends StatelessWidget {
                 color: Colors.grey,
                 fontSize: 12,
               ),
-              textAlign: TextAlign.end,
+              textAlign: TextAlign.start,
               overflow: TextOverflow.ellipsis,
             ),
           ),

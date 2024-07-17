@@ -91,7 +91,10 @@ class _SuccessBody extends StatelessWidget {
       return Row(
         children: [
           _IssuesButton(worksheet: worksheet),
-          _ExportButton(worksheet: worksheet),
+          SizedBox(
+            width: 48,
+            child: _ExportButton(worksheet: worksheet),
+          ),
         ],
       );
     }
