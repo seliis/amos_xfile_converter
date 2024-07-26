@@ -40,10 +40,10 @@ class Export extends Cubit<ExportState> {
     return chunks;
   }
 
-  static String _getSaveName(String worksheetName) {
+  static String _getSaveName(String workbookName, String worksheetName) {
     final String timeStamp = DateFormat("yyyyMMdd_HHmmss").format(DateTime.now());
 
-    return "xfile_${worksheetName.toLowerCase()}_$timeStamp.txt";
+    return "xfile_${workbookName}_${worksheetName}_$timeStamp.txt".toLowerCase();
   }
 
   static Future<void> _bufferWrite(List<String> chunks, File file) async {
@@ -56,13 +56,13 @@ class Export extends Cubit<ExportState> {
     await file.writeAsString(buffer.toString(), mode: FileMode.write);
   }
 
-  Future<void> export(List<entity.SchemaConstraint> schemaConstraints, List<List<entity.Cell>> records, String worksheetName) async {
+  Future<void> export(List<entity.SchemaConstraint> schemaConstraints, List<List<entity.Cell>> records, String workbookName, String worksheetName) async {
     emit(ExportLoading());
 
     final List<String> chunks = _getChunks(schemaConstraints, records);
 
     String? savePath = await FilePicker.platform.saveFile(
-      fileName: _getSaveName(worksheetName),
+      fileName: _getSaveName(workbookName, worksheetName),
       type: FileType.custom,
       allowedExtensions: [
         "txt",

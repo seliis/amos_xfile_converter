@@ -49,7 +49,7 @@ class Import extends Cubit<ImportState> {
     return issues;
   }
 
-  static List<entity.Worksheet> _getWorksheets(excel.Excel workbook) {
+  static List<entity.Worksheet> _getWorksheets(excel.Excel workbook, String workbookName) {
     final List<entity.Worksheet> worksheets = [];
 
     for (final String worksheetName in workbook.tables.keys) {
@@ -81,6 +81,7 @@ class Import extends Cubit<ImportState> {
 
       worksheets.add(
         entity.Worksheet(
+          workbookName: workbookName,
           worksheetName: worksheetName,
           schemaConstraints: schemaConstraints,
           worksheetRecords: worksheetRecords,
@@ -128,10 +129,17 @@ class Import extends Cubit<ImportState> {
       return;
     }
 
+    final String workbookName = (() {
+      final String name = result.files.single.name;
+      final int idx = name.lastIndexOf(".");
+
+      return idx == -1 ? name : name.substring(0, idx);
+    })();
+
     emit(
       ImportSuccess(
-        workbookName: result.names.first!,
-        worksheets: _getWorksheets(workbook),
+        workbookName: workbookName,
+        worksheets: _getWorksheets(workbook, workbookName),
       ),
     );
   }

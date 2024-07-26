@@ -3,12 +3,14 @@ import "package:flutter/material.dart";
 
 class Worksheet {
   const Worksheet({
+    required this.workbookName,
     required this.worksheetName,
     required this.schemaConstraints,
     required this.worksheetRecords,
     required this.issues,
   });
 
+  final String workbookName;
   final String worksheetName;
   final List<SchemaConstraint> schemaConstraints;
   final List<List<Cell>> worksheetRecords;
