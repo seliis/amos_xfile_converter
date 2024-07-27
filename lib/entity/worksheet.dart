@@ -28,11 +28,11 @@ class Cell {
   final int rowIndex;
   final int columnIndex;
 
-  factory Cell.fromData(excel.Data? data) {
+  factory Cell.fromData(excel.Data? data, int rowIndex, int columnIndex) {
     return Cell(
       data: data?.value != null ? data!.value.toString() : "",
-      rowIndex: data?.rowIndex != null ? data!.rowIndex + 1 : 0,
-      columnIndex: data?.columnIndex != null ? data!.columnIndex + 1 : 0,
+      rowIndex: data?.rowIndex != null ? data!.rowIndex + 1 : rowIndex + 1,
+      columnIndex: data?.columnIndex != null ? data!.columnIndex + 1 : columnIndex + 1,
     );
   }
 }

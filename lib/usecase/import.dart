@@ -1,5 +1,7 @@
+import "dart:async";
 import "dart:io";
 
+import "package:flutter/foundation.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 import "package:file_picker/file_picker.dart";
 import "package:excel/excel.dart" as excel;
@@ -9,7 +11,7 @@ import "package:bakkugi/entity/index.dart" as entity;
 class Import extends Cubit<ImportState> {
   Import() : super(ImportInitial());
 
-  static List<entity.Issue> _getIssues(List<entity.SchemaConstraint> schemaConstraints, List<List<entity.Cell>> worksheetRecords) {
+  List<entity.Issue> _getIssues(List<entity.SchemaConstraint> schemaConstraints, List<List<entity.Cell>> worksheetRecords) {
     final List<entity.Issue> issues = [];
 
     for (final List<entity.Cell> cells in worksheetRecords) {
@@ -49,11 +51,22 @@ class Import extends Cubit<ImportState> {
     return issues;
   }
 
-  static List<entity.Worksheet> _getWorksheets(excel.Excel workbook, String workbookName) {
+  List<entity.Cell> _getRecord(_RowData rowData) {
+    final List<entity.Cell> record = [];
+
+    for (int columnIndex = 0; columnIndex < rowData.row.length; columnIndex++) {
+      final excel.Data? data = rowData.row[columnIndex];
+      record.add(entity.Cell.fromData(data, rowData.rowIndex, columnIndex));
+    }
+
+    return record;
+  }
+
+  Future<List<entity.Worksheet>> _getWorksheets(entity.Workbook workbook) async {
     final List<entity.Worksheet> worksheets = [];
 
-    for (final String worksheetName in workbook.tables.keys) {
-      final excel.Sheet sheet = workbook.tables[worksheetName]!;
+    for (final String worksheetName in workbook.instance.tables.keys) {
+      final excel.Sheet sheet = workbook.instance.tables[worksheetName]!;
 
       final List<entity.SchemaConstraint> schemaConstraints = [];
 
@@ -75,13 +88,15 @@ class Import extends Cubit<ImportState> {
 
       final List<List<entity.Cell>> worksheetRecords = [];
 
-      for (final List<excel.Data?> row in sheet.rows.sublist(1)) {
-        worksheetRecords.add(row.map((data) => entity.Cell.fromData(data)).toList());
+      for (int i = 1; i < sheet.rows.length; i++) {
+        final List<entity.Cell> record = _getRecord(_RowData(row: sheet.rows[i], rowIndex: i));
+
+        worksheetRecords.add(record);
       }
 
       worksheets.add(
         entity.Worksheet(
-          workbookName: workbookName,
+          workbookName: workbook.name,
           worksheetName: worksheetName,
           schemaConstraints: schemaConstraints,
           worksheetRecords: worksheetRecords,
@@ -94,7 +109,7 @@ class Import extends Cubit<ImportState> {
   }
 
   Future<void> import() async {
-    emit(ImportLoading());
+    emit(ImportLoading(message: "Importing..."));
 
     final FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -117,39 +132,69 @@ class Import extends Cubit<ImportState> {
       file = File(result.paths.single!);
     }
 
-    late excel.Excel workbook;
+    late excel.Excel primitiveWorkbook;
 
     try {
-      workbook = excel.Excel.decodeBytes(file.readAsBytesSync());
+      emit(ImportLoading(message: "Decoding..."));
+
+      primitiveWorkbook = await compute(
+        excel.Excel.decodeBytes,
+        file.readAsBytesSync() as List<int>,
+      ).then((value) {
+        emit(ImportLoading(message: "Processing..."));
+        return value;
+      });
     } on FileSystemException {
       emit(ImportFailure(errorMessage: "file.readAsBytesSync()"));
       return;
     } on Exception {
       emit(ImportFailure(errorMessage: "Excel.decodeBytes()"));
       return;
+    } catch (e) {
+      emit(ImportFailure(errorMessage: e.toString().toLowerCase()));
+      return;
     }
 
-    final String workbookName = (() {
-      final String name = result.files.single.name;
-      final int idx = name.lastIndexOf(".");
+    final entity.Workbook workbook = entity.Workbook(
+      instance: primitiveWorkbook,
+      name: (() {
+        final String name = result.files.single.name;
+        final int idx = name.lastIndexOf(".");
 
-      return idx == -1 ? name : name.substring(0, idx);
-    })();
+        return idx == -1 ? name : name.substring(0, idx);
+      })(),
+    );
 
     emit(
       ImportSuccess(
-        workbookName: workbookName,
-        worksheets: _getWorksheets(workbook, workbookName),
+        workbookName: workbook.name,
+        worksheets: await _getWorksheets(workbook),
       ),
     );
   }
+}
+
+class _RowData {
+  _RowData({
+    required this.row,
+    required this.rowIndex,
+  });
+
+  final List<excel.Data?> row;
+  final int rowIndex;
 }
 
 sealed class ImportState {}
 
 final class ImportInitial extends ImportState {}
 
-final class ImportLoading extends ImportState {}
+final class ImportLoading extends ImportState {
+  ImportLoading({
+    required this.message,
+  });
+
+  final String message;
+}
 
 final class ImportSuccess extends ImportState {
   ImportSuccess({

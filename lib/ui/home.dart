@@ -1,4 +1,3 @@
-import "package:flutter/widgets.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 import "package:flutter/material.dart";
@@ -32,13 +31,13 @@ class Home extends StatelessWidget {
           }
 
           if (state is usecase.ImportFailure) {
-            ui.showingSnackBar(context, "Import Failed: ${state.errorMessage}", false);
+            ui.showingSnackBar(context, "ERROR: ${state.errorMessage}", false);
 
             return null;
           }
 
-          return const Center(
-            child: CircularProgressIndicator(),
+          return Center(
+            child: Text((state as usecase.ImportLoading).message),
           );
         }
 
