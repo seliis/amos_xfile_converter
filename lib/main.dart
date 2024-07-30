@@ -33,6 +33,9 @@ Future<void> main() async {
         BlocProvider(
           create: (context) => usecase.Export(),
         ),
+        BlocProvider(
+          create: (context) => usecase.Settings()..init(),
+        ),
       ],
       child: MaterialApp(
         onGenerateRoute: nav.PageRouter.onGenerateRoute,

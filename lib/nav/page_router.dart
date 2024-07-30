@@ -7,6 +7,8 @@ class PageRouter {
     switch (settings.name) {
       case ui.Home.pageName:
         return _getRoute(const ui.Home());
+      case ui.Settings.pageName:
+        return _getRoute(const ui.Settings());
       default:
         return _getRoute(
           const Scaffold(

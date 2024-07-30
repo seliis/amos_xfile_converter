@@ -1,7 +1,8 @@
 import "dart:io";
 
-import "package:file_picker/file_picker.dart";
+import "package:shared_preferences/shared_preferences.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
+import "package:file_picker/file_picker.dart";
 import "package:intl/intl.dart";
 
 import "package:bakkugi/entity/index.dart" as entity;
@@ -61,8 +62,11 @@ class Export extends Cubit<ExportState> {
 
     final List<String> chunks = _getChunks(schemaConstraints, records);
 
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
     String? savePath = await FilePicker.platform.saveFile(
       fileName: _getSaveName(workbookName, worksheetName),
+      initialDirectory: prefs.getString("export_path"),
       type: FileType.custom,
       allowedExtensions: [
         "txt",

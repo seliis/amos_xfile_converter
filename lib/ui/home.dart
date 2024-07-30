@@ -6,6 +6,7 @@ import "package:bakkugi/usecase/index.dart" as usecase;
 import "package:bakkugi/entity/index.dart" as entity;
 import "package:bakkugi/ui/index.dart" as ui;
 
+part "settings_button.dart";
 part "issues_button.dart";
 part "export_button.dart";
 part "info_button.dart";
@@ -56,10 +57,10 @@ class Home extends StatelessWidget {
                     "Please Import a .XLSX File",
                   ),
             actions: const [
+              _SettingsButton(),
+              SizedBox(width: 16),
               _InfoButton(),
-              SizedBox(
-                width: 16,
-              ),
+              SizedBox(width: 16),
             ],
           ),
           body: getBody(),

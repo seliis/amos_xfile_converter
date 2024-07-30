@@ -1,10 +1,11 @@
 import "dart:async";
 import "dart:io";
 
-import "package:flutter/foundation.dart";
+import "package:shared_preferences/shared_preferences.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 import "package:file_picker/file_picker.dart";
 import "package:excel/excel.dart" as excel;
+import "package:flutter/foundation.dart";
 
 import "package:bakkugi/entity/index.dart" as entity;
 
@@ -111,7 +112,10 @@ class Import extends Cubit<ImportState> {
   Future<void> import() async {
     emit(ImportLoading(message: "Importing..."));
 
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
     final FilePickerResult? result = await FilePicker.platform.pickFiles(
+      initialDirectory: prefs.getString("import_path"),
       type: FileType.custom,
       allowedExtensions: [
         "xlsx"
