@@ -17,15 +17,15 @@ class Export extends Cubit<ExportState> {
       final List<entity.Cell> record = records[i];
       String string = "";
 
-      for (int i = 0; i < record.length; i++) {
-        final schemaConstraint = schemaConstraints[i];
+      for (int j = 0; j < record.length; j++) {
+        final schemaConstraint = schemaConstraints[j];
 
         final List<String> segment = List.filled(schemaConstraint.capacity, " ");
 
-        final entity.Cell cell = record[i];
+        final entity.Cell cell = record[j];
 
-        for (int j = 0; j < cell.data.length; j++) {
-          segment[j] = cell.data[j];
+        for (int k = 0; k < cell.data.length; k++) {
+          segment[k] = cell.data[k];
         }
 
         string += segment.join();
