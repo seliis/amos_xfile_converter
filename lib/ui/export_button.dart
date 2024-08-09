@@ -12,6 +12,10 @@ class _ExportButton extends StatelessWidget {
     final state = context.watch<usecase.Export>().state;
 
     if (state is usecase.ExportLoading) {
+      if (state.worksheetName != worksheet.worksheetName) {
+        return const _PrimitiveExportButton(onPressed: null);
+      }
+
       return Transform.scale(
         scale: 0.5,
         child: const CircularProgressIndicator(),
@@ -48,9 +52,24 @@ class _Button extends StatelessWidget {
           );
     }
 
-    return IconButton(
+    return _PrimitiveExportButton(
       onPressed: worksheet.issues.isNotEmpty ? null : invokeExport,
+    );
+  }
+}
+
+class _PrimitiveExportButton extends StatelessWidget {
+  const _PrimitiveExportButton({
+    required this.onPressed,
+  });
+
+  final void Function()? onPressed;
+
+  @override
+  Widget build(context) {
+    return IconButton(
       icon: const Icon(Icons.download),
+      onPressed: onPressed,
       tooltip: "Export",
     );
   }

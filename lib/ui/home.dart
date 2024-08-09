@@ -1,3 +1,5 @@
+import "package:flutter/rendering.dart";
+import "package:flutter/widgets.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 import "package:flutter/material.dart";
@@ -37,10 +39,15 @@ class Home extends StatelessWidget {
             return null;
           }
 
-          return Center(
-            child: Text((state as usecase.ImportLoading).message),
+          return const Center(
+            child: CircularProgressIndicator(),
           );
         }
+
+        final TextStyle textStyle = const TextStyle(
+          fontWeight: FontWeight.w200,
+          fontSize: 20,
+        );
 
         return Scaffold(
           appBar: AppBar(
@@ -52,9 +59,10 @@ class Home extends StatelessWidget {
               },
             ),
             title: context.read<usecase.Import>().state is usecase.ImportSuccess
-                ? Text((state as usecase.ImportSuccess).workbookName)
-                : const Text(
-                    "Please Import a .XLSX File",
+                ? Text((state as usecase.ImportSuccess).workbookName, style: textStyle)
+                : Text(
+                    "PLEASE IMPORT A .XLSX FILE",
+                    style: textStyle,
                   ),
             actions: const [
               _SettingsButton(),
@@ -105,6 +113,7 @@ class _SuccessBody extends StatelessWidget {
           for (final worksheet in state.worksheets)
             ListTile(
               leading: getStatusIcon(worksheet),
+              onTap: () {},
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,

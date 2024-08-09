@@ -58,7 +58,7 @@ class Export extends Cubit<ExportState> {
   }
 
   Future<void> export(List<entity.SchemaConstraint> schemaConstraints, List<List<entity.Cell>> records, String workbookName, String worksheetName) async {
-    emit(ExportLoading());
+    emit(ExportLoading(worksheetName: worksheetName));
 
     final List<String> chunks = _getChunks(schemaConstraints, records);
 
@@ -88,7 +88,11 @@ sealed class ExportState {}
 
 final class ExportInitial extends ExportState {}
 
-final class ExportLoading extends ExportState {}
+final class ExportLoading extends ExportState {
+  final String worksheetName;
+
+  ExportLoading({required this.worksheetName});
+}
 
 final class ExportSuccess extends ExportState {
   final String filePath;

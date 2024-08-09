@@ -1,11 +1,11 @@
 import "dart:async";
 import "dart:io";
 
+import "package:flutter/foundation.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 import "package:file_picker/file_picker.dart";
 import "package:excel/excel.dart" as excel;
-import "package:flutter/foundation.dart";
 
 import "package:bakkugi/entity/index.dart" as entity;
 
@@ -110,7 +110,7 @@ class Import extends Cubit<ImportState> {
   }
 
   Future<void> import() async {
-    emit(ImportLoading(message: "Importing..."));
+    emit(ImportLoading());
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -139,15 +139,7 @@ class Import extends Cubit<ImportState> {
     late excel.Excel primitiveWorkbook;
 
     try {
-      emit(ImportLoading(message: "Decoding..."));
-
-      primitiveWorkbook = await compute(
-        excel.Excel.decodeBytes,
-        file.readAsBytesSync() as List<int>,
-      ).then((value) {
-        emit(ImportLoading(message: "Processing..."));
-        return value;
-      });
+      primitiveWorkbook = await compute(excel.Excel.decodeBytes, file.readAsBytesSync());
     } on FileSystemException {
       emit(ImportFailure(errorMessage: "file.readAsBytesSync()"));
       return;
@@ -192,13 +184,7 @@ sealed class ImportState {}
 
 final class ImportInitial extends ImportState {}
 
-final class ImportLoading extends ImportState {
-  ImportLoading({
-    required this.message,
-  });
-
-  final String message;
-}
+final class ImportLoading extends ImportState {}
 
 final class ImportSuccess extends ImportState {
   ImportSuccess({
